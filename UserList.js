@@ -1,6 +1,8 @@
 import { ScrollView } from "react-native";
 import { Avatar, Card, Button, IconButton, Divider } from "react-native-paper";
 import { styles } from "./App";
+import Animated, { Easing, FadeInLeft } from "react-native-reanimated";
+import { View } from "react-native";
 
 const testData = [
   {
@@ -109,24 +111,28 @@ const UserList = ({ navigation }) => {
   return (
     <ScrollView contentContainerStyle={styles.cardScrollview}>
       {testData.map((user) => (
-        <Card style={styles.card}>
-          <Card.Title
-            title={user.name}
-            subtitle={user.email}
-            left={(props) => (
-              <Avatar.Image size={50} source={{ uri: user.photo_url }} />
-            )}
-            style={{backgroundColor:"red"}}
-          />
-          <Card.Actions style={{backgroundColor:"white"}}>
-            <IconButton
-            icon="chevron-right"
-            onPress={() => navigation.navigate("Profile", {user})}
-            size={20}
-            />
-          </Card.Actions>
-          <Divider />
-        </Card>
+        <View key={user.email}>
+          <Animated.View entering={FadeInLeft.duration(Math.random() * (800 - 500) + 500).easing(Easing.ease)}>
+            <Card style={styles.card}>
+              <Card.Title
+                title={user.name}
+                subtitle={user.email}
+                left={(props) => (
+                  <Avatar.Image size={50} source={{ uri: user.photo_url }} />
+                )}
+                style={{ backgroundColor: "red" }}
+              />
+              <Card.Actions style={{ backgroundColor: "white" }}>
+                <IconButton
+                  icon="chevron-right"
+                  onPress={() => navigation.navigate("Profile", { user })}
+                  size={20}
+                />
+              </Card.Actions>
+              <Divider />
+            </Card>
+          </Animated.View>
+        </View>
       ))}
     </ScrollView>
   );
