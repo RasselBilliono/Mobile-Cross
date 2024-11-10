@@ -1,79 +1,147 @@
-import React, { useState, useEffect } from "react";
-import { StyleSheet, View, FlatList, Pressable } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { getPosts } from "./services/axios";
-import { Card, Text } from "react-native-paper";
-import Form from "./Form";
+import React, { useState } from "react";
+import { StyleSheet, View, Button, PermissionsAndroid, Text, Platform } from "react-native";
+import { launchImageLibrary, launchCamera } from "react-native-image-picker";
+import RNFS from "react-native-fs"; 
 
-const Stack = createNativeStackNavigator();
+function App() {
+  const [uri, setUri] = useState("");
 
-function HomeScreen({ navigation }) {
-  const [posts, setPosts] = useState([]);
+  const saveFile = async (photoUri) => {
+    try {
+      const fileName = "test_photo.jpg"; 
+      const path = RNFS.PicturesDirectoryPath + "/" + fileName;
 
-  const getAllPosts = () => {
-    getPosts().then((res) => {
-      if (res.status === 200) {
-        setPosts(res.data);
+      await RNFS.copyFile(photoUri, path);
+      console.log("Success: Photo saved to Pictures folder.");
+    } catch (err) {
+      console.error("Error saving photo:", err);
+    }
+  };
+
+  const openImagePicker = async () => {
+    const granted = await requestGalleryPermission();
+    if (granted) {
+      launchImageLibrary(
+        {
+          mediaType: "photo",
+          includeBase64: false,
+          maxHeight: 2000,
+          maxWidth: 2000,
+        },
+        handleResponse
+      );
+    }
+  };
+
+  const handleCameraLaunch = async () => {
+    const granted = await requestCameraPermission();
+    if (granted) {
+      launchCamera(
+        {
+          mediaType: "photo",
+          includeBase64: false,
+          maxHeight: 2000,
+          maxWidth: 2000,
+        },
+        handleResponse
+      );
+    }
+  };
+
+  const requestCameraPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        {
+          title: "Camera Permission",
+          message: "This app needs access to your camera to take photos.",
+          buttonNeutral: "Ask Me Later",
+          buttonNegative: "Cancel",
+          buttonPositive: "OK",
+        }
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log("Camera permission granted");
+        return true;
+      } else {
+        console.log("Camera permission denied");
+        return false;
       }
-    });
+    } catch (err) {
+      console.warn(err);
+      return false;
+    }
   };
 
-  useEffect(() => {
-    getAllPosts();
-  }, []);
-
-  const updatePostInList = (updatedPost) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post.id === updatedPost.id ? updatedPost : post
-      )
-    );
+  const requestGalleryPermission = async () => {
+    try {
+      if (Platform.OS === "android" && Platform.Version >= 29) {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+          {
+            title: "Gallery Permission",
+            message: "This app needs access to your gallery to select photos.",
+            buttonNeutral: "Ask Me Later",
+            buttonNegative: "Cancel",
+            buttonPositive: "OK",
+          }
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          console.log("Gallery permission granted");
+          return true;
+        } else {
+          console.log("Gallery permission denied");
+          return false;
+        }
+      } else {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          {
+            title: "Storage Permission",
+            message: "This app needs access to your storage to select photos.",
+            buttonNeutral: "Ask Me Later",
+            buttonNegative: "Cancel",
+            buttonPositive: "OK",
+          }
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      }
+    } catch (err) {
+      console.warn(err);
+      return false;
+    }
   };
 
-  const renderListItem = ({ item }) => (
-    <Pressable
-      key={item.id}
-      onPress={() => navigation.navigate("Form", { post: item, updatePostInList })}
-    >
-      <Card>
-        <Card.Title title={item.title} />
-        <Card.Content>
-          <Text variant="bodyMedium">{item.body}</Text>
-        </Card.Content>
-      </Card>
-    </Pressable>
-  );
+  const handleResponse = (response) => {
+    if (response.didCancel) {
+      console.log("User cancelled image picker");
+    } else if (response.error) {
+      console.log("Image picker error: ", response.error);
+    } else if (response.assets && response.assets.length > 0) {
+      const imageUri = response.assets[0].uri;
+      setUri(imageUri);
+      saveFile(imageUri); 
+    } else {
+      console.log("No assets found in the response");
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <Text>Rassel Billiono - 00000037399</Text>
-      {posts.length > 0 && (
-        <FlatList
-          data={posts}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={renderListItem}
-        />
-      )}
+      <Button title="Open Image Picker" onPress={openImagePicker} />
+      <Button title="Launch Camera" onPress={handleCameraLaunch} />
+      {uri ? <Text>Selected Image URI: {uri}</Text> : <Text>No image selected</Text>}
     </View>
-  );
-}
-
-export default function App() {
-  return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="Home" component={HomeScreen} options={{ title: "Posts" }} />
-        <Stack.Screen name="Form" component={Form} options={{ title: "Edit Post" }} />
-      </Stack.Navigator>
-    </NavigationContainer>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#fff",
     flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
     padding: 16,
   },
 });
+
+export default App;
