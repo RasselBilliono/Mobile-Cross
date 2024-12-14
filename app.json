@@ -11,6 +11,17 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "extra": {
+      "firebase": {
+        "apiKey": "AIzaSyAkmiRjoIIJW4CGVeJrSKCRrLUdFnTf2JM",
+        "authDomain": "mobile-crossplat.firebaseapp.com",
+        "projectId": "mobile-crossplat",
+        "storageBucket": "mobile-crossplat.firebasestorage.app",
+        "messagingSenderId": "376783126390",
+        "appId": "1:376783126390:web:437df3cc3d0d06001a0457",
+        "measurementId": "G-NT5P4DXZF9"
+      }
+    },
     "ios": {
       "supportsTablet": true
     },
@@ -18,10 +29,22 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "googleServicesFile": "./google-services.json",
+      "package": "com.rasselb27.crossplatW2",
+      "permissions": ["ACCESS_FINE_LOCATION"]
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow app to use your location."
+        }
+      ]
+    ]
     }
   }
-}
+

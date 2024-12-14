@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "376783126390",
+    "project_id": "mobile-crossplat",
+    "storage_bucket": "mobile-crossplat.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:376783126390:android:0a4395220b31c95a1a0457",
+        "android_client_info": {
+          "package_name": "com.crossplatform.umn"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBibo3cphgv_W1ox2siiHaCm2c-Ax5ppD8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
